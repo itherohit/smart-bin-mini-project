@@ -102,7 +102,7 @@ app.get("/filled",loginAuth, async function(req,res){
 })
 
 app.get("/login", function(req,res){
-  res.render("Login");
+  res.render("login");
 })
 
 app.post("/login", function(req,res){
