@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Bins</title>
+    <link rel="stylesheet" href="/styles.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
+</head>
+<body>
+    <div class="main__section">
+        <h1 class="form__heading">Smart Bin Details</h1>
+        <form action="/new" method="post">
+            <div class="container">
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label">Name</label>
+                    <input name="name" type="text" class="form-control" id="exampleFormControlInput1" placeholder="Smart Bin Name" value="<%= data.name %>" disabled>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label">Location</label>
+                    <input name="location" type="text" class="form-control" id="exampleFormControlInput1" placeholder="Location" value="<%= data.location %>" disabled>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label">Latitude</label>
+                    <input name="lat" type="text" class="form-control" id="exampleFormControlInput1" placeholder="Latitude of smart bin" value="<%= data.lat %>" disabled>
+                </div>
+                <div class="mb-3">
+                    <label for="exampleFormControlInput1" class="form-label">Longitude</label>
+                    <input name="lon" type="text" class="form-control" id="exampleFormControlInput1" placeholder="Longitude of smart bin" value="<%= data.lon %>" disabled>
+                </div>
+                <label for="exampleFormControlInput1" class="form-label">Code</label>
+                <div class="code__section">
+                    
+                    <pre>
+                            
+                            #include Servo.h   //servo library
+                            Servo servo;    
+                            int ID = <%= data.id %>; 
+                            int trigPin = 6;    
+                            int echoPin = 5; 
+                            int trigPinDist = 11;    
+                            int echoPinDist = 10;  
+                            int servoPin = 7;
+                            int led= 10;
+                            long duration, durationDist, dist, trashDist, average;   
+                            long aver[3],adist[3];   //array for average
+                            
+                            
+                            void setup() {       
+                                Serial.begin(9600);
+                                servo.attach(servoPin);  
+                                pinMode(trigPin, OUTPUT);  
+                                pinMode(echoPin, INPUT);
+                                  pinMode(trigPinDist, OUTPUT);  
+                                pinMode(echoPinDist, INPUT); 
+                                pinMode(9, OUTPUT);
+                                servo.write(0);         //close cap on power on
+                                delay(100);
+                                servo.detach(); 
+                            } 
+                            
+                            void measure() {  
+                                digitalWrite(trigPin, LOW);
+                                delayMicroseconds(5);
+                                digitalWrite(trigPin, HIGH);
+                                delayMicroseconds(15);
+                                digitalWrite(trigPin, LOW);
+                                pinMode(echoPin, INPUT);
+                                duration = pulseIn(echoPin, HIGH);
+                                dist = (duration/2) / 29.1;    //obtain distance
+                            }
+                            
+                            void measureDist() {  
+                                digitalWrite(trigPinDist, LOW);
+                                delayMicroseconds(5);
+                                digitalWrite(trigPinDist, HIGH);
+                                delayMicroseconds(15);
+                                digitalWrite(trigPinDist, LOW);
+                                pinMode(echoPinDist, INPUT);
+                                durationDist = pulseIn(echoPinDist, HIGH);
+                                trashDist = (durationDist/2) / 29.1;    //obtain distance
+                            }
+                            
+                            void loop(){ 
+                                  measureDist();
+                                  measure(); 
+                                  if(trashDist<30){
+                                    //send data to cloud
+                                    digitalWrite(9, HIGH);
+                                    delay(1000);
+                                    Serial.print(trashDist);
+                                    digitalWrite(9, LOW);
+                                  }
+                                else{
+                                  if(dist<50) {
+                                      //Change distance as per your need
+                                      servo.attach(servoPin);
+                                      delay(1);     
+                                      servo.write(150);    
+                                      delay(1000);
+                                      servo.detach();      
+                                  }
+                                  else{
+                                      servo.attach(servoPin);
+                                      delay(1);     
+                                      servo.write(0);    
+                                      delay(1000);
+                                      servo.detach();
+                                  }
+                                }
+                                  Serial.print(dist);
+                            }
+                    </pre>
+                </div>
+            </div>
+        </form>
+    </div>
+</body>
+</html>
