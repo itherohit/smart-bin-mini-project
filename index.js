@@ -29,7 +29,7 @@ const loginAuth = (req,res,next) => {
 };
 
 
-const port = 4000;
+const port = process.env.PORT || 4000;
 
 var uri = "mongodb+srv://itherohit:admin@cluster0.hfpba.mongodb.net/SmartBin?retryWrites=true&w=majority";
 
