@@ -160,6 +160,19 @@ app.get("/view/:id",loginAuth, async function(req,res){
   res.render("view", {data: data});
 })
 
+
+app.get("/update/:id",async function(req,res){
+  const id = req.params.id;
+  let data = await smartbins.findOneAndUpdate({ _id: id},{isFull: true});
+  res.send("Filled");
+})
+
+app.post("/update/:id",async function(req,res){
+  const id = req.params.id;
+  let data = await smartbins.findOneAndUpdate({ _id: id},{isFull: true});
+  res.send("Filled");
+})
+
 app.listen(port, function() {
   console.log("Server is running on Port: " + port);
 });

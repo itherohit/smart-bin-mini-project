@@ -34,82 +34,94 @@
                     
                     <pre>
                             
-                            #include Servo.h   //servo library
-                            Servo servo;    
-                            int ID = <%= data.id %>; 
-                            int trigPin = 6;    
-                            int echoPin = 5; 
-                            int trigPinDist = 11;    
-                            int echoPinDist = 10;  
-                            int servoPin = 7;
-                            int led= 10;
-                            long duration, durationDist, dist, trashDist, average;   
-                            long aver[3],adist[3];   //array for average
+                            #include Servo.h
+                            #include ESP8266HTTPClient.h
+                            #include ESP8266WiFi.h
                             
+                            Servo servo1;
                             
-                            void setup() {       
-                                Serial.begin(9600);
-                                servo.attach(servoPin);  
-                                pinMode(trigPin, OUTPUT);  
-                                pinMode(echoPin, INPUT);
-                                  pinMode(trigPinDist, OUTPUT);  
-                                pinMode(echoPinDist, INPUT); 
-                                pinMode(9, OUTPUT);
-                                servo.write(0);         //close cap on power on
-                                delay(100);
-                                servo.detach(); 
-                            } 
+                            int ID = <%= data.id %>;
                             
-                            void measure() {  
-                                digitalWrite(trigPin, LOW);
-                                delayMicroseconds(5);
-                                digitalWrite(trigPin, HIGH);
-                                delayMicroseconds(15);
-                                digitalWrite(trigPin, LOW);
-                                pinMode(echoPin, INPUT);
-                                duration = pulseIn(echoPin, HIGH);
-                                dist = (duration/2) / 29.1;    //obtain distance
+                            int ssid = "Wifi Name";
+                            int pass = "Wifi Password";
+                            
+                            int GreenPin = 12;
+                            int RedPin = 13;
+                            
+                            int trigPin = 9;
+                            int echoPin = 8;
+                            
+                            int trigPin1 = 6;
+                            int echoPin1 = 5;
+                            
+                            long distance;
+                            long duration;
+                            
+                            long distance1;
+                            long duration1;
+                            
+                            void setup() {
+                              Serial.begin(115200);                         //Serial connection
+                              WiFi.begin(ssid,pass);                        //WiFi connection
+                              while (WiFi.status() != WL_CONNECTED) {       //Wait for the WiFI connection completion
+                                delay(500);
+                                Serial.println("Waiting for connection");
+                              }
+                              servo1.attach(7); 
+                              pinMode(GreenPin, OUTPUT);
+                              pinMode(RedPin,OUTPUT);
+                              pinMode(trigPin, OUTPUT);
+                              pinMode(echoPin, INPUT);                      // put your setup code here, to run once:
+                              pinMode(trigPin1, OUTPUT);
+                              pinMode(echoPin1, INPUT);//
                             }
                             
-                            void measureDist() {  
-                                digitalWrite(trigPinDist, LOW);
-                                delayMicroseconds(5);
-                                digitalWrite(trigPinDist, HIGH);
-                                delayMicroseconds(15);
-                                digitalWrite(trigPinDist, LOW);
-                                pinMode(echoPinDist, INPUT);
-                                durationDist = pulseIn(echoPinDist, HIGH);
-                                trashDist = (durationDist/2) / 29.1;    //obtain distance
-                            }
-                            
-                            void loop(){ 
-                                  measureDist();
-                                  measure(); 
-                                  if(trashDist<30){
-                                    //send data to cloud
-                                    digitalWrite(9, HIGH);
-                                    delay(1000);
-                                    Serial.print(trashDist);
-                                    digitalWrite(9, LOW);
-                                  }
-                                else{
-                                  if(dist<50) {
-                                      //Change distance as per your need
-                                      servo.attach(servoPin);
-                                      delay(1);     
-                                      servo.write(150);    
-                                      delay(1000);
-                                      servo.detach();      
-                                  }
-                                  else{
-                                      servo.attach(servoPin);
-                                      delay(1);     
-                                      servo.write(0);    
-                                      delay(1000);
-                                      servo.detach();
-                                  }
+                            void loop(){
+                              ultra_sonic();
+                              ultra_sonic1();
+                              servo1.write(0);
+                              if(distance <=9){
+                                servo1.write(270);
+                                delay(2000);
+                              }
+                              if(distance1 <=2){
+                                 digitalWrite(RedPin,HIGH);
+                                 digitalWrite(GreenPin,LOW);
+                                 if (WiFi.status() == WL_CONNECTED) {                   //Check WiFi connection status
+                                    HTTPClient http;                                    //Declare object of class HTTPClient
+                                    http.begin("https://smart-bin-sastra.herokuapp.com/update/" + ID);       //Specify request destination
+                                    http.addHeader("Content-Type", "text/plain");       //Specify content-type header
+                                    int httpCode = http.POST("Message from ESP8266");   //Send the request
+                                    String payload = http.getString();                  //Get the response payload
+                                    Serial.println(httpCode);                           //Print HTTP return code
+                                    Serial.println(payload);                            //Print request response payload
+                                    http.end();                                         //Close connection
                                 }
-                                  Serial.print(dist);
+                              }
+                              else{
+                                 digitalWrite(RedPin,LOW);
+                                 digitalWrite(GreenPin,HIGH);
+                              }
+                            }
+                            
+                            void ultra_sonic(){
+                              digitalWrite(trigPin, LOW);
+                              delayMicroseconds(2);
+                              digitalWrite(trigPin, HIGH);
+                              delayMicroseconds(10);
+                              digitalWrite(trigPin, LOW);
+                              duration = pulseIn(echoPin, HIGH);
+                              distance = duration*0.034/6;
+                            }
+                            
+                            void ultra_sonic1(){
+                              digitalWrite(trigPin1, LOW);
+                              delayMicroseconds(2);
+                              digitalWrite(trigPin1, HIGH);
+                              delayMicroseconds(10);
+                              digitalWrite(trigPin1, LOW);
+                              duration1 = pulseIn(echoPin1, HIGH);
+                              distance1 = duration1*0.034/6;
                             }
                     </pre>
                 </div>
