@@ -36,7 +36,7 @@
                         <td><a href= <%= "/view/" + bin._id %>><%= bin.name %></a></td>
                         <td><%= bin.location %></td>
                         <td><%= bin.isFull ? "Full" : "Not Full" %></td>
-                        <td><a href= <%= "/delete/" + bin._id %>>Delete</a></td>
+                        <td><a href= <%= "/delete/" + bin._id %>>Delete</a> <a href= <%= "/reset/" + bin._id %>>Reset</a></td>
                     </tr>
                 <% }) %>
             </tbody>
